@@ -38,6 +38,8 @@ static int bind_to_interface(int sockfd, const char* ifname) {
         fprintf(stderr, "Failed to bind socket to interface\n");
         return -1;
     }
+
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -63,7 +65,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Binded socket to provided interface, listening to traffic\n");
-    char buffer[2048];
+    unsigned char buffer[2048];
     int n_packets_to_examine = 10;
     while (n_packets_to_examine > 0) {
         struct sockaddr address; 
