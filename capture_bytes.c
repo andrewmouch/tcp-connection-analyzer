@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
                 printf("   Ethernet host source: "); 
                 print_mac_address(ethernet_header->h_source);
                 printf("\n");
-                struct iphdr *ip_header = (struct iphdr*) buffer + sizeof(ethernet_header); 
+                struct iphdr *ip_header = (struct iphdr*) (buffer + ETH_HLEN); 
                 char source_ip_address[INET_ADDRSTRLEN];
                 char dest_ip_address[INET_ADDRSTRLEN];
                 inet_ntop(AF_INET, &(ip_header->saddr), source_ip_address, INET_ADDRSTRLEN);
