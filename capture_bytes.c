@@ -71,8 +71,7 @@ int main(int argc, char *argv[]) {
 
     printf("Binded socket to provided interface, listening to traffic\n");
     unsigned char buffer[2048];
-    int n_packets_to_examine = 10;
-    while (n_packets_to_examine > 0) {
+    for (int i = 0; i < 10; i++) {
         struct sockaddr address;
         memset(&address, 0, sizeof(address));
 
@@ -86,15 +85,35 @@ int main(int argc, char *argv[]) {
         printf("Packet length: %zd\n", num_bytes);
 
         struct ethhdr *ethernet_header = (struct ethhdr *)buffer;
-        printf("   Ethernet host destination: ");
-        print_mac_address(ethernet_header->h_dest);
-        printf("\n");
-        printf("   Ethernet host source: "); 
-        print_mac_address(ethernet_header->h_source);
-        printf("\n");
-        printf("   Ethernet host proto: %04x\n", ntohs(ethernet_header->h_proto));
-        printf("\n");
-        n_packets_to_examine = n_packets_to_examine - 1;
+        switch(ntohs(ethernet_header->h_proto)) {
+            case(ETH_P_IP):
+                printf("IPv4 datagram detected, proceeding with parsing\n");
+                printf("   Ethernet host destination: ");
+                print_mac_address(ethernet_header->h_dest);
+                printf("\n");
+                printf("   Ethernet host source: "); 
+                print_mac_address(ethernet_header->h_source);
+                printf("\n");
+                struct iphdr *ip_header = (struct iphdr*) buffer + sizeof(ethernet_header); 
+                char source_ip_address[INET_ADDRSTRLEN];
+                char dest_ip_address[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, &(ip_header->saddr), source_ip_address, INET_ADDRSTRLEN);
+                inet_ntop(AF_INET, &(ip_header->daddr), dest_ip_address, INET_ADDRSTRLEN);
+
+                printf("       IP Source Address: ");
+                printf("%s", source_ip_address);
+                printf("\n");
+                printf("       IP Destination Address: ");
+                printf("%s", dest_ip_address);
+                printf("\n");
+                break;
+            case(ETH_P_IPV6):
+                printf("IPv6 datagram detected, parsing not yet implemented\n");
+                break;
+            default:
+                printf("Other datagram type detected, parsing not yet implemented\n");
+                break;
+        }
     }
 
     close(sockfd);
