@@ -18,6 +18,7 @@ static int bind_to_interface(int sockfd, const char* ifname) {
     struct ifreq interface;
     memset(&interface, 0, sizeof(interface));
     strncpy(interface.ifr_name, ifname, IFNAMSIZ - 1);
+    interface.ifr_name[IFNAMSIZ - 1] = '\0';
 
     // IOCTL is a function to perform non standardized operations on a file descriptor
     // The operation is defined by the second parameter
