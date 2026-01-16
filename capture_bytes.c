@@ -17,7 +17,7 @@
 static int bind_to_interface(int sockfd, const char* ifname) {
     struct ifreq interface;
     memset(&interface, 0, sizeof(interface));
-    strncpy(interface.ifr_name, ifname, IFNAMSIZ);
+    strncpy(interface.ifr_name, ifname, IFNAMSIZ - 1);
 
     // IOCTL is a function to perform non standardized operations on a file descriptor
     // The operation is defined by the second parameter
@@ -72,17 +72,20 @@ int main(int argc, char *argv[]) {
     printf("Binded socket to provided interface, listening to traffic\n");
     unsigned char buffer[2048];
     for (int i = 0; i < 10; i++) {
-        struct sockaddr address;
-        memset(&address, 0, sizeof(address));
-
         ssize_t num_bytes = recv(sockfd, buffer, sizeof(buffer), 0);
 
-        if (num_bytes == -1) {
+        if (num_bytes < 0) {
             fprintf(stderr, "Failed to obtain bytes\n");
             return EXIT_FAILURE;
         }
 
-        printf("Packet length: %zd\n", num_bytes);
+        size_t u_num_bytes = (size_t) num_bytes;
+        printf("Packet length: %zu\n", u_num_bytes);
+
+        if (u_num_bytes < sizeof(struct ethhdr)) {
+            printf("Packet too small to contain ethernet header, continuing\n");
+            continue;
+        }
 
         struct ethhdr *ethernet_header = (struct ethhdr *)buffer;
         switch(ntohs(ethernet_header->h_proto)) {
@@ -94,6 +97,10 @@ int main(int argc, char *argv[]) {
                 printf("   Ethernet host source: "); 
                 print_mac_address(ethernet_header->h_source);
                 printf("\n");
+                if (u_num_bytes < sizeof(struct ethhdr) + sizeof(struct iphdr)) {
+                    printf("Packet too small to contain ip header, continuing\n");
+                    continue;
+                }
                 struct iphdr *ip_header = (struct iphdr*) (buffer + ETH_HLEN); 
                 char source_ip_address[INET_ADDRSTRLEN];
                 char dest_ip_address[INET_ADDRSTRLEN];
