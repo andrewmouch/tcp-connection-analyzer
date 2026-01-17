@@ -48,6 +48,17 @@ void print_mac_address(unsigned char* bytes) {
     printf("%02x:%02x:%02x:%02x:%02x:%02x", bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5]); 
 }
 
+void print_protocol_type(uint8_t byte) {
+    if (byte == 6) {
+        printf("TCP");
+    } else if (byte == 17) {
+        printf("UDP");
+    } else {
+        printf("Other");
+    }
+    
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <interface>\n", argv[0]);
@@ -113,6 +124,9 @@ int main(int argc, char *argv[]) {
                 printf("\n");
                 printf("       IP Destination Address: ");
                 printf("%s", dest_ip_address);
+                printf("\n");
+                printf("       Protocol Type: ");
+                print_protocol_type(ip_header->protocol);
                 printf("\n");
                 break;
             case(ETH_P_IPV6):
