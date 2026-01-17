@@ -66,7 +66,6 @@ uint16_t ones_complement_sum(const uint16_t *data, size_t words) {
         sum += data[i];
     }
 
-    // Fold end-around carry until clean
     while (sum >> 16) {
         sum = (sum & 0xFFFF) + (sum >> 16);
     }
