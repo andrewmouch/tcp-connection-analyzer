@@ -59,6 +59,20 @@ void print_protocol_type(uint8_t byte) {
     
 }
 
+uint16_t ones_complement_sum(const uint16_t *data, size_t words) {
+    uint32_t sum = 0;
+
+    for (size_t i = 0; i < words; i++) {
+        sum += data[i];
+    }
+
+    while (sum >> 16) {
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    }
+
+    return (uint16_t)(~sum & 0xFFFF);
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <interface>\n", argv[0]);
@@ -109,8 +123,17 @@ int main(int argc, char *argv[]) {
                 printf("   Ethernet host source: "); 
                 print_mac_address(ethernet_header->h_source);
                 printf("\n");
-                if (u_num_bytes < sizeof(struct ethhdr) + sizeof(struct iphdr)) {
-                    printf("Packet too small to contain ip header, continuing\n");
+                // Check if version and IHL byte is in packet before accessing memory
+                if (u_num_bytes < ETH_HLEN + 1) {
+                    printf("Packet doesn't contain version/IHL byte in IP header, continuing");
+                    continue;
+                }
+                uint8_t ver_ihl = buffer[ETH_HLEN];
+                uint8_t ihl = ver_ihl & 0xF; 
+                uint8_t num_bytes_ip_header = ihl*4; // ihl in header represents num of 32 bit words, multiply by 4 to get num bytes
+                printf("NUM BYTES IP HEADER: %hhu", num_bytes_ip_header);
+                if (u_num_bytes < ETH_HLEN + num_bytes_ip_header) {
+                    printf("Packet length not long enough to contain ip header, continuing");
                     continue;
                 }
                 struct iphdr *ip_header = (struct iphdr*) (buffer + ETH_HLEN); 
@@ -127,6 +150,15 @@ int main(int argc, char *argv[]) {
                 printf("\n");
                 printf("       Protocol Type: ");
                 print_protocol_type(ip_header->protocol);
+                printf("\n");
+                printf("       IP Header Checksum: "); 
+                // Including result of checksum in ones complement calculation will always yield 0, use this property for validation
+                uint16_t checksum_res = ones_complement_sum((uint16_t*)ip_header, num_bytes_ip_header/2);
+                if (checksum_res == 0) {
+                    printf("VALID");
+                } else {
+                    printf("INVALID");
+                }
                 printf("\n");
                 break;
             case(ETH_P_IPV6):
