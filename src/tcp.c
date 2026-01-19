@@ -5,6 +5,47 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
+void print_tcp_set_flags(uint8_t flags) {
+    int first = 1;
+    printf("[");
+    
+    if (flags & TH_FIN) {
+        printf("FIN");
+        first = 0;
+    }
+    if (flags & TH_SYN) {
+        if (!first) printf(",");
+        printf("SYN");
+        first = 0;
+    }
+    if (flags & TH_RST) {
+        if (!first) printf(",");
+        printf("RST");
+        first = 0;
+    }
+    if (flags & TH_PUSH) {
+        if (!first) printf(",");
+        printf("PSH");
+        first = 0;
+    }
+    if (flags & TH_ACK) {
+        if (!first) printf(",");
+        printf("ACK");
+        first = 0;
+    }
+    if (flags & TH_URG) {
+        if (!first) printf(",");
+        printf("URG");
+        first = 0;
+    }
+    
+    if (first) {
+        printf("NONE"); 
+    }
+    
+    printf("]");
+}
+
 int parse_tcp_header(const unsigned char* segment, size_t len, tcp_result_t* out) {
     if (len < sizeof(struct tcphdr)) {
         fprintf(stderr, "Segment too small to contain a tcp header");
@@ -15,6 +56,8 @@ int parse_tcp_header(const unsigned char* segment, size_t len, tcp_result_t* out
     printf("          TCP Destination Port: %" PRIu16 "\n", ntohs(tcp_header->th_dport));
     printf("          TCP Sequence Number: %" PRIu32 "\n", ntohl(tcp_header->th_seq));
     printf("          TCP Acknowledgement Number: %" PRIu32 "\n", ntohl(tcp_header->th_ack));
-
+    printf("          TCP Set Flags: ");
+    print_tcp_set_flags(tcp_header->th_flags);
+    printf("\n");
     return 0;
 }
