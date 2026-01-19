@@ -18,14 +18,14 @@ static void print_protocol_type(uint8_t byte) {
 int parse_ipv4_header(const unsigned char* packet, size_t len, ipv4_result_t* out) {
     // Check if version and IHL byte is in packet before accessing memory
     if (len < 1) {
-        fprintf(stderr, "Packet doesn't contain version/IHL byte in IP header, continuing");
+        fprintf(stderr, "Packet doesn't contain version/IHL byte in IP header, continuing\n");
         return -1;
     }
     uint8_t ver_ihl = *packet;
     uint8_t ihl = ver_ihl & 0xF; 
     size_t num_bytes_ip_header = ihl*4; // ihl in header represents num of 32 bit words, multiply by 4 to get num bytes
     if (len < num_bytes_ip_header) {
-        fprintf(stderr, "Packet length not long enough to contain ip header, continuing");
+        fprintf(stderr, "Packet length not long enough to contain ip header, continuing\n");
         return -1;
     }
     struct iphdr *ip_header = (struct iphdr*) (packet); 
