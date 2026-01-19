@@ -18,6 +18,7 @@
 #include "checksum.h"
 #include "ethernet.h"
 #include "ipv4.h"
+#include "tcp.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -61,15 +62,10 @@ int main(int argc, char *argv[]) {
         ipv4_result_t ipv4_result;
         int ipv4_status = parse_ipv4_header(ethresult.payload, ethresult.payload_len, &ipv4_result);
         if (ipv4_status == -1) continue;
-
-               
-        // if (ip_header->protocol == IPPROTO_TCP) {
-            // struct tcphdr *tcp_header = (struct tcphdr*) (buffer + ETH_HLEN + num_bytes_ip_header);
-            // printf("          TCP Source Port: %" PRIu16 "\n", tcp_header->th_sport);
-            // printf("          TCP Destination Port: %" PRIu16 "\n", tcp_header->th_dport);
-            // printf("          TCP Sequence Number: %" PRIu32 "\n", tcp_header->th_seq);
-            // printf("          TCP Acknowledgement Number: %" PRIu32 "\n", tcp_header->th_ack);
-        // }
+ 
+        tcp_result_t tcp_result;
+        int tcp_status = parse_tcp_header(ipv4_result.payload, ipv4_result.payload_len, &tcp_result);
+        if (tcp_status == -1) continue;
     }
 
     close(sockfd);

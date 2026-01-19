@@ -16,4 +16,4 @@ typedef struct {
     size_t payload_len;
 } ethresult_t;
 
-int parse_ethernet_header(unsigned char* packet, size_t len, ethresult_t* out);
+int parse_ethernet_header(const unsigned char* packet, size_t len, ethresult_t* out);

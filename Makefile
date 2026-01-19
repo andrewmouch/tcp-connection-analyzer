@@ -13,7 +13,8 @@ SRC = $(SRC_DIR)/main.c \
       $(SRC_DIR)/socket.c \
       $(SRC_DIR)/checksum.c \
       $(SRC_DIR)/ethernet.c \
-      $(SRC_DIR)/ipv4.c
+      $(SRC_DIR)/ipv4.c \
+      $(SRC_DIR)/tcp.c
 
 all: $(TARGET)
 
