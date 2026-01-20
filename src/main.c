@@ -5,17 +5,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/un.h>
-#include <linux/if_packet.h>
-#include <net/ethernet.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
-#include <arpa/inet.h>
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-#include <inttypes.h>
 #include "socket.h"
-#include "checksum.h"
 #include "ethernet.h"
 #include "ipv4.h"
 #include "tcp.h"
