@@ -46,3 +46,27 @@ void delete_tcp_state_table(tcp_state_table_t *table) {
     free(table->buckets);
     free(table);
 }
+
+tcp_connection_node_t* add_tcp_connection_node(
+    tcp_state_table_t *table,
+    uint32_t source_ip,
+    uint32_t dest_ip,
+    uint16_t source_port,
+    uint16_t dest_port
+) {
+    uint32_t hash = generate_4tuple_hash(source_ip, dest_ip, source_port, dest_port);
+    uint32_t index = hash % table->num_buckets;
+    
+    tcp_connection_node_t* tcp_connection_node = calloc(1, sizeof(*tcp_connection_node));
+    if (!tcp_connection_node) return NULL;
+
+    tcp_connection_node->source_ip = source_ip;
+    tcp_connection_node->dest_ip = dest_ip;
+    tcp_connection_node->source_port = source_port;
+    tcp_connection_node->dest_port = dest_port;
+
+    tcp_connection_node->next = table->buckets[index];
+    table->buckets[index] = tcp_connection_node;
+
+    return tcp_connection_node;
+}
