@@ -9,6 +9,7 @@
 #include "ethernet.h"
 #include "ipv4.h"
 #include "tcp.h"
+#include "tcp_state.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -31,6 +32,7 @@ int main(int argc, char *argv[]) {
     
     printf("Binded socket to provided interface, listening to traffic\n");
     unsigned char buffer[2048];
+    tcp_state_table_t* table = create_tcp_state_table(4096, ipv4_address);
     for (int i = 0; i < 1; i++) {
         ssize_t num_bytes = recv(sockfd, buffer, sizeof(buffer), 0);
 
@@ -57,8 +59,10 @@ int main(int argc, char *argv[]) {
         tcp_result_t tcp_result;
         int tcp_status = parse_tcp_header(ipv4_result.payload, ipv4_result.payload_len, &tcp_result);
         if (tcp_status == -1) continue;
-    }
 
+        int update_tcp_state_status = update_tcp_state(table, &tcp_result, &ipv4_result);
+        if (update_tcp_state_status == -1) continue;
+    }
     close(sockfd);
     return EXIT_SUCCESS;
 }

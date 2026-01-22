@@ -34,6 +34,9 @@ int parse_ipv4_header(const unsigned char* packet, size_t len, ipv4_result_t* ou
     inet_ntop(AF_INET, &(ip_header->saddr), source_ip_address, INET_ADDRSTRLEN);
     inet_ntop(AF_INET, &(ip_header->daddr), dest_ip_address, INET_ADDRSTRLEN);
 
+    out->source_ip_address = ip_header->saddr;
+    out->dest_ip_address = ip_header->daddr;
+
     printf("       IP Source Address: ");
     printf("%s", source_ip_address);
     printf("\n");

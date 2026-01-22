@@ -20,6 +20,10 @@ int open_socket_for_interface(const char* ifname) {
     // type: SOCK_RAW means do not parse the packets at all, provide them to us in their binary format as they arrive
     // protocol: htons(ETH_P_ALL) provide us with ALL the packets, kernel expects the protocol in network order so convert to big endian
     int sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    if (sockfd == -1) {
+        fprintf(stderr, "Problem occurred when opening socket\n");
+        return -1;
+    }
 
     struct ifreq interface;
     memset(&interface, 0, sizeof(interface));
@@ -52,6 +56,10 @@ int open_socket_for_interface(const char* ifname) {
 
 uint32_t get_ipv4_address_for_interface(const char* ifname, uint32_t* ip_out) {
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
+    if (sockfd == -1) {
+        fprintf(stderr, "Problem occurred when opening socket\n");
+        return -1;
+    }
 
     struct ifreq interface;
     memset(&interface, 0, sizeof(interface));
