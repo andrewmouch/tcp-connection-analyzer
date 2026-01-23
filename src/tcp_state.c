@@ -220,6 +220,10 @@ int update_tcp_state(const tcp_state_table_t* table, const tcp_result_t* tcp_res
 
     tcp_connection_node_t* node = find_tcp_connection_node(table, local_ip_address, remote_ip_address, local_port, remote_port);
     if (!node) {
+        if (!(tcp_result->flag_syn && !tcp_result->flag_ack)) {
+            // let's only add the new nodes if the packet is a syn request
+            // That way we reduce clutter for already existing communications when we start the process
+        }
         node = add_tcp_connection_node(table, local_ip_address, remote_ip_address, local_port, remote_port);
         if (!node) {
             fprintf(stderr, "Unable to create tcp node representing connection in hash table\n");
@@ -236,7 +240,6 @@ int update_tcp_state(const tcp_state_table_t* table, const tcp_result_t* tcp_res
     return 0;
 }
 
-// Helper to convert TCP state enum to string
 static const char* tcp_state_to_string(tcp_connection_state_t state) {
     switch (state) {
         case TCP_STATE_CLOSED:       return "CLOSED";
@@ -253,7 +256,6 @@ static const char* tcp_state_to_string(tcp_connection_state_t state) {
     }
 }
 
-// Print the TCP table
 void print_tcp_state_table(const tcp_state_table_t* table) {
     if (!table) return;
 
