@@ -1,5 +1,6 @@
 #include "tcp_state.h"
 #include <stdlib.h>
+#include <arpa/inet.h> // for inet_ntoa
 
 #define TCP_HASH_SEED 0x9e3779b1
 
@@ -233,4 +234,52 @@ int update_tcp_state(const tcp_state_table_t* table, const tcp_result_t* tcp_res
     }
 
     return 0;
+}
+
+// Helper to convert TCP state enum to string
+static const char* tcp_state_to_string(tcp_connection_state_t state) {
+    switch (state) {
+        case TCP_STATE_CLOSED:       return "CLOSED";
+        case TCP_STATE_SYN_SENT:     return "SYN_SENT";
+        case TCP_STATE_SYN_RECEIVED: return "SYN_RECEIVED";
+        case TCP_STATE_ESTABLISHED:  return "ESTABLISHED";
+        case TCP_STATE_FIN_WAIT_1:   return "FIN_WAIT_1";
+        case TCP_STATE_FIN_WAIT_2:   return "FIN_WAIT_2";
+        case TCP_STATE_CLOSE_WAIT:   return "CLOSE_WAIT";
+        case TCP_STATE_CLOSING:      return "CLOSING";
+        case TCP_STATE_LAST_ACK:     return "LAST_ACK";
+        case TCP_STATE_TIME_WAIT:    return "TIME_WAIT";
+        default:                     return "UNKNOWN";
+    }
+}
+
+// Print the TCP table
+void print_tcp_state_table(const tcp_state_table_t* table) {
+    if (!table) return;
+
+    printf("TCP State Table\n");
+    printf("----------------------------------------------------\n");
+
+    for (int i = 0; i < table->num_buckets; ++i) {
+        tcp_connection_node_t* node = table->buckets[i];
+        while (node) {
+            struct in_addr l_ip = { node->local_ip };
+            struct in_addr r_ip = { node->remote_ip };
+            char local_ip_str[INET_ADDRSTRLEN];
+            char remote_ip_str[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &l_ip, local_ip_str, INET_ADDRSTRLEN);
+            inet_ntop(AF_INET, &r_ip, remote_ip_str, INET_ADDRSTRLEN);
+
+            printf("Local: %s:%u <-> Remote: %s:%u | %s\n",
+                local_ip_str,
+                node->local_port,
+                remote_ip_str,
+                node->remote_port,
+                tcp_state_to_string(node->state)
+            );
+
+            node = node->next;
+        }
+    }
+    printf("----------------------------------------------------\n");
 }

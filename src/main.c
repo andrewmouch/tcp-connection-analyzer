@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     printf("Binded socket to provided interface, listening to traffic\n");
     unsigned char buffer[2048];
     tcp_state_table_t* table = create_tcp_state_table(4096, ipv4_address);
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 10; i++) {
         ssize_t num_bytes = recv(sockfd, buffer, sizeof(buffer), 0);
 
         if (num_bytes < 0) {
@@ -62,6 +62,8 @@ int main(int argc, char *argv[]) {
 
         int update_tcp_state_status = update_tcp_state(table, &tcp_result, &ipv4_result);
         if (update_tcp_state_status == -1) continue;
+
+        print_tcp_state_table(table);
     }
     close(sockfd);
     return EXIT_SUCCESS;
