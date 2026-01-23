@@ -54,7 +54,7 @@ int open_socket_for_interface(const char* ifname) {
     return sockfd;
 }
 
-uint32_t get_ipv4_address_for_interface(const char* ifname, uint32_t* ip_out) {
+int get_ipv4_address_for_interface(const char* ifname, uint32_t* ip_out) {
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0); 
     if (sockfd == -1) {
         fprintf(stderr, "Problem occurred when opening socket\n");

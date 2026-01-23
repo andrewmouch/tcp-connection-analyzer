@@ -37,24 +37,24 @@ int parse_ipv4_header(const unsigned char* packet, size_t len, ipv4_result_t* ou
     out->source_ip_address = ip_header->saddr;
     out->dest_ip_address = ip_header->daddr;
 
-    printf("       IP Source Address: ");
-    printf("%s", source_ip_address);
-    printf("\n");
-    printf("       IP Destination Address: ");
-    printf("%s", dest_ip_address);
-    printf("\n");
-    printf("       Protocol Type: ");
-    print_protocol_type(ip_header->protocol);
-    printf("\n");
-    printf("       IP Header Checksum: "); 
+    // printf("       IP Source Address: ");
+    // printf("%s", source_ip_address);
+    // printf("\n");
+    // printf("       IP Destination Address: ");
+    // printf("%s", dest_ip_address);
+    // printf("\n");
+    // printf("       Protocol Type: ");
+    // print_protocol_type(ip_header->protocol);
+    // printf("\n");
+    // printf("       IP Header Checksum: "); 
     // Including result of checksum in ones complement calculation will always yield 0, use this property for validation
-    uint16_t checksum_res = ones_complement_sum((uint16_t*)ip_header, num_bytes_ip_header/2);
-    if (checksum_res == 0) {
-        printf("VALID");
-    } else {
-        printf("INVALID");
-    }
-    printf("\n");
+    // uint16_t checksum_res = ones_complement_sum((uint16_t*)ip_header, num_bytes_ip_header/2);
+    // if (checksum_res == 0) {
+        // printf("VALID");
+    // } else {
+        // printf("INVALID");
+    // }
+    // printf("\n");
                
     switch(ip_header->protocol) {
         case(IPPROTO_TCP):

@@ -14,12 +14,12 @@ int parse_ethernet_header(const unsigned char* frame, size_t len, ethresult_t* o
     }
 
     struct ethhdr *ethernet_header = (struct ethhdr *)frame;
-    printf("   Ethernet host destination: ");
-    print_mac_address(ethernet_header->h_dest);
-    printf("\n");
-    printf("   Ethernet host source: "); 
-    print_mac_address(ethernet_header->h_source);
-    printf("\n");
+    // printf("   Ethernet host destination: ");
+    // print_mac_address(ethernet_header->h_dest);
+    // printf("\n");
+    // printf("   Ethernet host source: "); 
+    // print_mac_address(ethernet_header->h_source);
+    // printf("\n");
     
     switch(ntohs(ethernet_header->h_proto)) {
         case(ETH_P_IP):

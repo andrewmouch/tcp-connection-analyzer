@@ -52,13 +52,13 @@ int parse_tcp_header(const unsigned char* segment, size_t len, tcp_result_t* out
         return -1;
     }
     struct tcphdr *tcp_header = (struct tcphdr*) (segment);
-    printf("          TCP Source Port: %" PRIu16 "\n", ntohs(tcp_header->th_sport));
-    printf("          TCP Destination Port: %" PRIu16 "\n", ntohs(tcp_header->th_dport));
-    printf("          TCP Sequence Number: %" PRIu32 "\n", ntohl(tcp_header->th_seq));
-    printf("          TCP Acknowledgement Number: %" PRIu32 "\n", ntohl(tcp_header->th_ack));
-    printf("          TCP Set Flags: ");
-    print_tcp_set_flags(tcp_header->th_flags);
-    printf("\n");
+    // printf("          TCP Source Port: %" PRIu16 "\n", ntohs(tcp_header->th_sport));
+    // printf("          TCP Destination Port: %" PRIu16 "\n", ntohs(tcp_header->th_dport));
+    // printf("          TCP Sequence Number: %" PRIu32 "\n", ntohl(tcp_header->th_seq));
+    // printf("          TCP Acknowledgement Number: %" PRIu32 "\n", ntohl(tcp_header->th_ack));
+    // printf("          TCP Set Flags: ");
+    // print_tcp_set_flags(tcp_header->th_flags);
+    // printf("\n");
     
     out->source_port = ntohs(tcp_header->th_sport);
     out->dest_port = ntohs(tcp_header->th_dport);

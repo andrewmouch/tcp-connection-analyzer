@@ -46,3 +46,5 @@ tcp_state_table_t* create_tcp_state_table(size_t num_buckets, uint32_t local_ipv
 void delete_tcp_state_table(tcp_state_table_t *table);
 
 int update_tcp_state(const tcp_state_table_t* table, const tcp_result_t* tcp_result, const ipv4_result_t* ip_result);
+
+void print_tcp_state_table(const tcp_state_table_t* table);
