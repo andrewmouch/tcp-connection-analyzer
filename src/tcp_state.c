@@ -131,6 +131,9 @@ static void update_tcp_node_state_receiving(tcp_connection_node_t* node, const t
 }
 
 static void update_tcp_node_state_sending(tcp_connection_node_t* node, const tcp_result_t* tcp_result) {
+    node->last_ack = tcp_result->ack_number;
+    node->last_seq = tcp_result->seq_number;
+
     if (tcp_result->flag_rst) {
         node->state = TCP_STATE_CLOSED;
         return;
@@ -273,12 +276,14 @@ void print_tcp_state_table(const tcp_state_table_t* table) {
             inet_ntop(AF_INET, &l_ip, local_ip_str, INET_ADDRSTRLEN);
             inet_ntop(AF_INET, &r_ip, remote_ip_str, INET_ADDRSTRLEN);
 
-            printf("Local: %s:%u <-> Remote: %s:%u | %s\n",
+            printf("Local: %s:%u <-> Remote: %s:%u | %s | last seq: %u | last ack: %u\n",
                 local_ip_str,
                 node->local_port,
                 remote_ip_str,
                 node->remote_port,
-                tcp_state_to_string(node->state)
+                tcp_state_to_string(node->state),
+                node->last_seq,
+                node->last_ack
             );
 
             node = node->next;
