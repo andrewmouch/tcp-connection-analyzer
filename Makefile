@@ -10,6 +10,7 @@ TARGET = exec/main
 
 # Source files
 SRC = $(SRC_DIR)/main.c \
+      $(SRC_DIR)/capture.c \
       $(SRC_DIR)/socket.c \
       $(SRC_DIR)/checksum.c \
       $(SRC_DIR)/ethernet.c \
