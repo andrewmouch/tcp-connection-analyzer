@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>TCP Connection Analyzer</title>
+    </head>
+    <body>
+        <h1>TCP Connections</h1>
+        <script>
+            async function fetchConnections() {
+                try {
+                    const res = await fetch("http://localhost:5000/hey");
+                    const data = await rest.json();
+
+                    print(data);
+                } catch(err) {
+                    console.error("Failed to fetch connections", err)
+                }
+            }
+            fetchConnections()
+        </script>
+    </body>
+</html>

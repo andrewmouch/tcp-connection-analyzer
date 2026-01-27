@@ -4,7 +4,11 @@
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
     if (ev == MG_EV_HTTP_MSG) {
         struct mg_http_message *hm = (struct mg_http_message *) ev_data;
-        if (mg_match(hm->uri, mg_str("/hey"), NULL)) {
+        if (mg_match(hm->uri, mg_str("/"), NULL)) {
+            struct mg_http_serve_opts opts = {0};
+            mg_http_serve_file(c, hm, "web/index.html", &opts); 
+        }
+        else if (mg_match(hm->uri, mg_str("/hey"), NULL)) {
             mg_http_reply(c, 200, "", "Hey\n");
         }
     }
@@ -16,7 +20,7 @@ int main() {
     mg_mgr_init(&mgr);
     mg_http_listen(&mgr, "http://0.0.0.0:5000", ev_handler, NULL);
 
-    printf("HTTP server started on port 8000\n");
+    printf("HTTP server started on port 5000\n");
 
     for (;;) {
         mg_mgr_poll(&mgr, 1000);
