@@ -1,70 +1,41 @@
-#define _DEFAULT_SOURCE
+#include <pthread.h>
+#include "mongoose.h"
+#include "capture.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <string.h>
-#include "socket.h"
-#include "ethernet.h"
-#include "ipv4.h"
-#include "tcp.h"
-#include "tcp_state.h"
-
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <interface>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    int sockfd = open_socket_for_interface(argv[1]);
-    if (sockfd == -1) {
-        fprintf(stderr, "Failed to bind socket to interface\n");
-        return EXIT_FAILURE;
-    }
-
-    uint32_t ipv4_address;
-    int get_ipv4_status = get_ipv4_address_for_interface(argv[1], &ipv4_address);
-    if (get_ipv4_status == -1) {
-        fprintf(stderr, "failed to get ipv4 address of interface\n");
-        return EXIT_FAILURE;
-    }
-    
-    printf("Binded socket to provided interface, listening to traffic\n");
-    unsigned char buffer[2048];
-    tcp_state_table_t* table = create_tcp_state_table(4096, ipv4_address);
-    for (int i = 0; i < 5000; i++) {
-        ssize_t num_bytes = recv(sockfd, buffer, sizeof(buffer), 0);
-
-        if (num_bytes < 0) {
-            fprintf(stderr, "Failed to obtain bytes\n");
-            return EXIT_FAILURE;
+static void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
+    if (ev == MG_EV_HTTP_MSG) {
+        struct mg_http_message *hm = (struct mg_http_message *) ev_data;
+        if (mg_match(hm->uri, mg_str("/"), NULL)) {
+            struct mg_http_serve_opts opts = {0};
+            mg_http_serve_file(c, hm, "web/index.html", &opts); 
         }
+        else if (mg_match(hm->uri, mg_str("/api/capture/start"), NULL)) {
+            pthread_t thread_id = 1;
+            char* interface = "wlp0s20f3";
+            if (pthread_create(&thread_id, NULL, capture_packets, (void *)interface) == -1) {
+                mg_http_reply(c, 400, "", "Failed to start listener\n");
+                fprintf(stderr, "Failed to start listener");
+            }
 
-        size_t u_num_bytes = (size_t) num_bytes;
-        printf("Packet length (in bytes): %zu\n", u_num_bytes);
-
-        // Linux normalizes headers into ethernet framing (irrespective of whether it may be Wi-Fi or another protocol)
-        // Hence why I'm able to call parse ethernet header on all the incoming packets
-        // I think better practice here is to check the ifreq object to see exactly what protocol/family it is
-        // In the meantime, other link layer protocols are not supported
-        ethresult_t ethresult;
-        int eth_status = parse_ethernet_header(buffer, u_num_bytes, &ethresult);
-        if (eth_status == -1) continue;
-        
-        ipv4_result_t ipv4_result;
-        int ipv4_status = parse_ipv4_header(ethresult.payload, ethresult.payload_len, &ipv4_result);
-        if (ipv4_status == -1) continue;
- 
-        tcp_result_t tcp_result;
-        int tcp_status = parse_tcp_header(ipv4_result.payload, ipv4_result.payload_len, &tcp_result);
-        if (tcp_status == -1) continue;
-
-        int update_tcp_state_status = update_tcp_state(table, &tcp_result, &ipv4_result);
-        if (update_tcp_state_status == -1) continue;
-
-        print_tcp_state_table(table);
+            mg_http_reply(c, 200, "", "Successfully started listener\n");
+        } else {
+            mg_http_reply(c, 404, "", "Not found\n");
+        }
     }
-    close(sockfd);
-    return EXIT_SUCCESS;
+}
+
+int main() {
+    struct mg_mgr mgr;
+
+    mg_mgr_init(&mgr);
+    mg_http_listen(&mgr, "http://0.0.0.0:5000", ev_handler, NULL);
+
+    printf("HTTP server started on port 5000\n");
+
+    for (;;) {
+        mg_mgr_poll(&mgr, 1000);
+    }
+
+    mg_mgr_free(&mgr);
+    return 0;
 }

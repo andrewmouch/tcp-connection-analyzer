@@ -9,7 +9,7 @@
         <script>
             async function fetchConnections() {
                 try {
-                    const res = await fetch("http://localhost:5000/hey");
+                    const res = await fetch("http://localhost:5000/api/capture/start");
                     const data = await rest.json();
 
                     print(data);
