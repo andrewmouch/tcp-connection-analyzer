@@ -17,7 +17,8 @@ SRC = $(SRC_DIR)/main.c \
       $(SRC_DIR)/ipv4.c \
       $(SRC_DIR)/tcp.c \
       $(SRC_DIR)/tcp_state.c \
-      $(LIB_DIR)/mongoose.c
+      $(LIB_DIR)/mongoose.c \
+      $(LIB_DIR)/cJSON.c
 
 all: $(TARGET)
 

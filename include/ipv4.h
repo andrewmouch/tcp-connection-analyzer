@@ -13,8 +13,14 @@ typedef enum {
 
 typedef struct {
     ipv4_protocol_t ipv4_protocol;
+
+    // Addresses are stored in network byte order
     uint32_t source_ip_address;
     uint32_t dest_ip_address;
+
+    char* source_ip_address_dotted_quad;
+    char* dest_ip_address_dotted_quad;
+
     bool checksum_is_valid;
     
     const unsigned char* payload;

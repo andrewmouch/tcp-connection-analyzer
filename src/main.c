@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include "mongoose.h"
 #include "capture.h"
+#include "cJSON.h"
 
 static void ev_handler(struct mg_connection* c, int ev, void* ev_data) {
     if (ev == MG_EV_HTTP_MSG) {

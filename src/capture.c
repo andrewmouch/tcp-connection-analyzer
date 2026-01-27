@@ -10,6 +10,7 @@
 #include "ipv4.h"
 #include "tcp.h"
 #include "tcp_state.h"
+#include "cJSON.h"
 
 void* capture_packets(void *arg){
     // if (argc != 2) {
@@ -31,10 +32,12 @@ void* capture_packets(void *arg){
         return EXIT_FAILURE;
     }
     
+    cJSON *obj = cJSON_CreateObject();
+
     printf("Binded socket to provided interface, listening to traffic\n");
     unsigned char buffer[2048];
     tcp_state_table_t* table = create_tcp_state_table(4096, ipv4_address);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
         ssize_t num_bytes = recv(sockfd, buffer, sizeof(buffer), 0);
 
         if (num_bytes < 0) {
@@ -64,8 +67,25 @@ void* capture_packets(void *arg){
         int update_tcp_state_status = update_tcp_state(table, &tcp_result, &ipv4_result);
         if (update_tcp_state_status == -1) continue;
 
-        print_tcp_state_table(table);
+
+        cJSON_AddStringToObject(obj, "src_ip", ipv4_result.source_ip_address_dotted_quad);
+        cJSON_AddStringToObject(obj, "dst_ip", ipv4_result.dest_ip_address_dotted_quad);
+
+        // print_tcp_state_table(table);
     }
     close(sockfd);
-    return EXIT_SUCCESS;
+    
+    char *json_string = cJSON_Print(obj);
+
+    if (json_string == NULL) {
+        fprintf(stderr, "Failed to print cJSON object.\n");
+        cJSON_Delete(obj);
+        return 1;
+    }
+
+    printf("Formatted JSON:\n%s\n", json_string);
+    
+    cJSON_Delete(obj);
+
+    return obj;
 }
