@@ -18,6 +18,26 @@
                 }
             }
             fetchConnections()
-        </script>
+            // Create a connection to the SSE endpoint
+            const eventSource = new EventSource("/api/capture/stream");
+
+            // Handle incoming messages
+            eventSource.onmessage = function(event) {
+                console.log("Received SSE:", event.data);
+
+                // Optionally append to the page
+                const log = document.getElementById("log");
+                log.textContent += event.data + "\n";
+            };
+
+            eventSource.onerror = function(err) {
+                console.error("SSE error:", err);
+            };
+
+            // Optionally handle connection open
+            eventSource.onopen = function() {
+                console.log("SSE connection opened");
+            };
+    </script>
     </body>
 </html>

@@ -3,9 +3,9 @@
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 
-static void print_mac_address(unsigned char* bytes) {
-    printf("%02x:%02x:%02x:%02x:%02x:%02x", bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5]); 
-}
+// static void print_mac_address(unsigned char* bytes) {
+    // printf("%02x:%02x:%02x:%02x:%02x:%02x", bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5]); 
+// }
 
 int parse_ethernet_header(const unsigned char* frame, size_t len, ethresult_t* out) {
     if (len < sizeof(struct ethhdr)) {
