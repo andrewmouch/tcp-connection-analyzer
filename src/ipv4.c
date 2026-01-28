@@ -5,15 +5,15 @@
 #include <netinet/ip.h>
 #include "checksum.h"
 
-static void print_protocol_type(uint8_t byte) {
-    if (byte == IPPROTO_TCP) {
-        printf("TCP");
-    } else if (byte == IPPROTO_UDP) {
-        printf("UDP");
-    } else {
-        printf("Other");
-    }
-}
+// static void print_protocol_type(uint8_t byte) {
+//     if (byte == IPPROTO_TCP) {
+//         printf("TCP");
+//     } else if (byte == IPPROTO_UDP) {
+//         printf("UDP");
+//     } else {
+//         printf("Other");
+//     }
+// }
 
 int parse_ipv4_header(const unsigned char* packet, size_t len, ipv4_result_t* out) {
     // Check if version and IHL byte is in packet before accessing memory

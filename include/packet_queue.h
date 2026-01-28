@@ -19,3 +19,5 @@ void packet_queue_init(packet_queue_t *q);
 void packet_queue_push(packet_queue_t* q, char* json);
 
 char* packet_queue_pop(packet_queue_t* q);
+
+char* packet_queue_try_pop(packet_queue_t* q);

@@ -1,5 +1,6 @@
 #define _DEFAULT_SOURCE
 
+#include "capture.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -11,29 +12,24 @@
 #include "tcp.h"
 #include "tcp_state.h"
 #include "cJSON.h"
+#include "mongoose.h"
 
 void* capture_packets(void *arg){
-    // if (argc != 2) {
-        // fprintf(stderr, "Usage: %s <interface>\n", argv[0]);
-        // return EXIT_FAILURE;
-    // }
+    struct packet_capture_thread_args* args = (struct packet_capture_thread_args*) arg;
 
-    char* interface = (char*) arg;
-    int sockfd = open_socket_for_interface(interface);
+    int sockfd = open_socket_for_interface(args->interface);
     if (sockfd == -1) {
         fprintf(stderr, "Failed to bind socket to interface\n");
-        return EXIT_FAILURE;
+        return NULL;
     }
 
     uint32_t ipv4_address;
-    int get_ipv4_status = get_ipv4_address_for_interface(interface, &ipv4_address);
+    int get_ipv4_status = get_ipv4_address_for_interface(args->interface, &ipv4_address);
     if (get_ipv4_status == -1) {
         fprintf(stderr, "failed to get ipv4 address of interface\n");
-        return EXIT_FAILURE;
+        return NULL;
     }
     
-    cJSON *obj = cJSON_CreateObject();
-
     printf("Binded socket to provided interface, listening to traffic\n");
     unsigned char buffer[2048];
     tcp_state_table_t* table = create_tcp_state_table(4096, ipv4_address);
@@ -42,7 +38,7 @@ void* capture_packets(void *arg){
 
         if (num_bytes < 0) {
             fprintf(stderr, "Failed to obtain bytes\n");
-            return EXIT_FAILURE;
+            return NULL;
         }
 
         size_t u_num_bytes = (size_t) num_bytes;
@@ -67,25 +63,23 @@ void* capture_packets(void *arg){
         int update_tcp_state_status = update_tcp_state(table, &tcp_result, &ipv4_result);
         if (update_tcp_state_status == -1) continue;
 
+        cJSON *json = cJSON_CreateObject();
+        cJSON_AddStringToObject(json, "src_ip", ipv4_result.source_ip_address_dotted_quad);
+        cJSON_AddStringToObject(json, "dst_ip", ipv4_result.dest_ip_address_dotted_quad);
 
-        cJSON_AddStringToObject(obj, "src_ip", ipv4_result.source_ip_address_dotted_quad);
-        cJSON_AddStringToObject(obj, "dst_ip", ipv4_result.dest_ip_address_dotted_quad);
+        char *json_str = cJSON_PrintUnformatted(json);
+        cJSON_Delete(json);
+
+        printf("GOT HERE WITH THE JSON STRING OF: %s", json_str);
+
+        packet_queue_push(args->packet_queue, json_str);
 
         // print_tcp_state_table(table);
     }
     close(sockfd);
     
-    char *json_string = cJSON_Print(obj);
+    free(args->interface);
+    free(args);
 
-    if (json_string == NULL) {
-        fprintf(stderr, "Failed to print cJSON object.\n");
-        cJSON_Delete(obj);
-        return 1;
-    }
-
-    printf("Formatted JSON:\n%s\n", json_string);
-    
-    cJSON_Delete(obj);
-
-    return obj;
+    return NULL;
 }
