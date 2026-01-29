@@ -1,35 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>TCP Connection Analyzer</title>
-    </head>
-    <body>
-        <h1>TCP Connections</h1>
-        <script>
-            async function fetchConnections() {
-                try {
-                    const res = await fetch("http://localhost:5000/api/capture/start");
+<head>
+    <meta charset="UTF-8" />
+    <title>TCP Connection Analyzer</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background: #f4f4f9; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .controls { margin-bottom: 20px; }
+        button { padding: 10px 15px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px; }
+        button#stopBtn { background: #dc3545; }
+    </style>
+</head>
+<body>
 
-                    console.log(res);
-                } catch(err) {
-                    console.error("Failed to fetch connections", err)
-                }
+    <h1>TCP Live Traffic</h1>
+
+    <div class="controls">
+        <button onclick="startCapture()">Start Capture</button>
+        <button id="stopBtn" onclick="stopCapture()">Stop Capture</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Source IP</th>
+                <th>Destination IP</th>
+            </tr>
+        </thead>
+        <tbody id="packet-table-body">
+            <!-- Data rows will appear here -->
+        </tbody>
+    </table>
+
+    <script>
+        const tableBody = document.getElementById('packet-table-body');
+
+        // 1. Start the backend capture
+        async function startCapture() {
+            try {
+                const res = await fetch("/api/capture/start");
+                console.log("Capture started:", await res.text());
+            } catch(err) {
+                console.error("Failed to start", err);
             }
-            fetchConnections()
-            const eventSource = new EventSource("/api/capture/stream");
+        }
 
-            eventSource.onmessage = function(event) {
-                console.log("Received SSE:", event.data);
-            };
+        // 2. Optional: Stop the backend capture
+        async function stopCapture() {
+            await fetch("/api/capture/stop");
+        }
 
-            eventSource.onerror = function(err) {
-                console.error("SSE error:", err);
-            };
+        // 3. Listen to the SSE stream
+        const eventSource = new EventSource("/api/capture/stream");
 
-            eventSource.onopen = function() {
-                console.log("SSE connection opened");
-            };
+        eventSource.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                
+                // Create a new row
+                const row = `
+                    <tr>
+                        <td>${new Date().toLocaleTimeString()}</td>
+                        <td>${data.src_ip || 'N/A'}</td>
+                        <td>${data.dst_ip || 'N/A'}</td>
+                    </tr>
+                `;
+
+                // Add to the top of the table so newest items appear first
+                tableBody.insertAdjacentHTML('afterbegin', row);
+
+                // Optional: Limit rows to prevent browser lag (e.g., keep last 50)
+                if (tableBody.children.length > 50) {
+                    tableBody.removeChild(tableBody.lastChild);
+                }
+
+            } catch (e) {
+                console.error("Error parsing JSON:", e, event.data);
+            }
+        };
+
+        eventSource.onerror = (err) => console.error("SSE error:", err);
     </script>
-    </body>
+</body>
 </html>
