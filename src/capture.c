@@ -33,7 +33,7 @@ void* capture_packets(void *arg){
     printf("Binded socket to provided interface, listening to traffic\n");
     unsigned char buffer[2048];
     tcp_state_table_t* table = create_tcp_state_table(4096, ipv4_address);
-    for (int i = 0; i < 100; i++) {
+    while (*args->should_capture) {
         ssize_t num_bytes = recv(sockfd, buffer, sizeof(buffer), 0);
 
         if (num_bytes < 0) {
