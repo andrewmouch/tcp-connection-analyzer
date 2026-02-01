@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include "cJSON.h"
 #include "parsers/link/ethernet.h"
 #include "parsers/network/ipv4.h"
 #include "parsers/transport/tcp.h"
@@ -25,3 +26,5 @@ typedef struct packet_ctx {
 
     // Add more protocols as required
 } packet_ctx_t;
+
+int jsonify_packet_ctx(packet_ctx_t* ctx, cJSON* out);
