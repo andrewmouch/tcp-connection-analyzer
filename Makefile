@@ -17,6 +17,7 @@ SRC = $(SRC_DIR)/main.c \
       $(SRC_DIR)/parsers/network/ipv4.c \
       $(SRC_DIR)/parsers/transport/tcp.c \
       $(SRC_DIR)/parsers/dispatch.c \
+      $(SRC_DIR)/parsers/context.c \
       $(SRC_DIR)/tcp_state.c \
       $(SRC_DIR)/packet_queue.c \
       $(LIB_DIR)/mongoose.c \

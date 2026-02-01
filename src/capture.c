@@ -15,6 +15,7 @@
 #include "tcp_state.h"
 #include "cJSON.h"
 #include "mongoose.h"
+#include "parsers/context.h"
 
 void* capture_packets(void *arg){
     struct packet_capture_thread_args* args = (struct packet_capture_thread_args*) arg;
@@ -67,8 +68,7 @@ void* capture_packets(void *arg){
         // if (update_tcp_state_status == -1) continue;
 
         cJSON *json = cJSON_CreateObject();
-        cJSON_AddStringToObject(json, "src_ip", ctx.ipv4.source_ip_address_dotted_quad);
-        cJSON_AddStringToObject(json, "dst_ip", ctx.ipv4.dest_ip_address_dotted_quad);
+        jsonify_packet_ctx(&ctx, json);
 
         char *json_str = cJSON_PrintUnformatted(json);
         cJSON_Delete(json);
